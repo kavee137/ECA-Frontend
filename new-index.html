@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juice Bar POS System</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <h1 class="logo">🍊 Juice Bar</h1>
+            <p class="tagline">Modern POS System</p>
+        </div>
+        <div class="header-right">
+            <div id="userInfo" class="user-info" style="display:none">
+                <div class="user-avatar">👤</div>
+                <div class="user-details">
+                    <span class="user-email" id="userEmail"></span>
+                    <span class="user-role">Customer</span>
+                </div>
+                <button class="btn btn-icon" onclick="app.logout()" title="Logout">🚪</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation (Hidden until auth) -->
+    <nav class="navbar" id="navbar" style="display:none">
+        <div class="nav-container">
+            <button class="nav-btn active" onclick="app.showPage('dashboard')" data-page="dashboard">
+                <span class="nav-icon">📊</span>
+                <span>Dashboard</span>
+            </button>
+            <button class="nav-btn" onclick="app.showPage('pos')" data-page="pos">
+                <span class="nav-icon">🛒</span>
+                <span>POS</span>
+            </button>
+            <button class="nav-btn" onclick="app.showPage('products')" data-page="products">
+                <span class="nav-icon">📦</span>
+                <span>Products</span>
+            </button>
+            <button class="nav-btn" onclick="app.showPage('orders')" data-page="orders">
+                <span class="nav-icon">📋</span>
+                <span>Orders</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Auth Page -->
+        <div id="authPage" class="page active">
+            <div class="auth-container">
+                <div class="auth-card">
+                    <div class="auth-header">
+                        <h2 id="authTitle">Welcome Back</h2>
+                        <p id="authSubtitle">Sign in to your account</p>
+                    </div>
+
+                    <div id="loginForm" class="auth-form">
+                        <div class="form-group">
+                            <label for="loginEmail">Email Address</label>
+                            <input type="email" id="loginEmail" placeholder="you@example.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPassword">Password</label>
+                            <input type="password" id="loginPassword" placeholder="••••••••" required>
+                        </div>
+                        <button class="btn btn-primary btn-block" onclick="auth.login()">Sign In</button>
+                        <p class="auth-toggle">
+                            Don't have an account?
+                            <a href="#" onclick="auth.toggleMode(event)">Create one</a>
+                        </p>
+                    </div>
+
+                    <div id="registerForm" class="auth-form" style="display:none">
+                        <div class="form-group">
+                            <label for="regName">Full Name</label>
+                            <input type="text" id="regName" placeholder="John Doe" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="regEmail">Email Address</label>
+                            <input type="email" id="regEmail" placeholder="you@example.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="regPassword">Password</label>
+                            <input type="password" id="regPassword" placeholder="••••••••" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="regPasswordConfirm">Confirm Password</label>
+                            <input type="password" id="regPasswordConfirm" placeholder="••••••••" required>
+                        </div>
+                        <button class="btn btn-primary btn-block" onclick="auth.register()">Create Account</button>
+                        <p class="auth-toggle">
+                            Already have an account?
+                            <a href="#" onclick="auth.toggleMode(event)">Sign in</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Page -->
+        <div id="dashboardPage" class="page">
+            <div class="page-header">
+                <h2>Dashboard</h2>
+                <p>Overview of your Juice Bar POS</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📦</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="statProducts">0</div>
+                        <div class="stat-label">Products</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📋</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="statOrders">0</div>
+                        <div class="stat-label">Orders</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="statRevenue">$0</div>
+                        <div class="stat-label">Revenue</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🎯</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="statItems">0</div>
+                        <div class="stat-label">Items Sold</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>Recent Orders</h3>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Product</th>
+                                <th>Qty</th>
+                                <th>Amount</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentOrdersTable">
+                            <tr>
+                                <td colspan="5" style="text-align:center;color:var(--text-muted)">No orders yet</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- POS Page -->
+        <div id="posPage" class="page">
+            <div class="page-header">
+                <h2>Point of Sale</h2>
+                <p>Add items to cart and process orders</p>
+            </div>
+
+            <div class="pos-container">
+                <div class="pos-products">
+                    <div class="search-box">
+                        <input
+                            type="text"
+                            id="posSearch"
+                            placeholder="🔍 Search products..."
+                            oninput="products.filterPosProducts()">
+                    </div>
+                    <div class="products-grid" id="posProductsGrid">
+                        <div class="empty-state">
+                            <p>Loading products...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pos-cart">
+                    <div class="cart-header">
+                        <h3>Cart</h3>
+                        <button class="btn btn-sm btn-outline" onclick="orders.clearCart()">Clear</button>
+                    </div>
+                    <div id="cartItems" class="cart-items">
+                        <div class="empty-state">
+                            <p>Cart is empty</p>
+                        </div>
+                    </div>
+                    <div class="cart-footer">
+                        <div class="cart-total">
+                            <span>Total:</span>
+                            <span class="total-amount" id="cartTotal">$0.00</span>
+                        </div>
+                        <button
+                            class="btn btn-success btn-block"
+                            onclick="orders.placeOrder()"
+                            id="placeOrderBtn"
+                            disabled>
+                            Place Order
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products Page -->
+        <div id="productsPage" class="page">
+            <div class="page-header">
+                <h2>Products</h2>
+                <button class="btn btn-primary" onclick="products.openAddModal()">+ Add Product</button>
+            </div>
+
+            <div class="products-grid" id="productsGrid">
+                <div class="empty-state">
+                    <p>Loading products...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Product Modal -->
+        <div class="modal" id="editProductModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Edit Product</h3>
+                    <button class="btn btn-icon" onclick="products.closeModals()">✕</button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="editProductId">
+                    <div class="form-group">
+                        <label for="editProductName">Product Name</label>
+                        <input type="text" id="editProductName" placeholder="e.g., Orange Juice">
+                    </div>
+                    <div class="form-group">
+                        <label for="editProductPrice">Price ($)</label>
+                        <input type="number" id="editProductPrice" placeholder="0.00" step="0.01" min="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Product Image</label>
+                        <div id="editProductImagePreview" style="display:none; width:100%; height:200px; border-radius:8px; overflow:hidden; margin-bottom:10px;">
+                            <img id="editProductImagePreviewImg" src="" alt="preview" style="width:100%; height:100%; object-fit:cover;">
+                        </div>
+                        <p id="editProductImageInfo" style="font-size:12px; color:var(--text-muted); margin-bottom:10px;"></p>
+                        <div class="image-upload-area" id="editProductImageUploadArea" onclick="document.getElementById('editProductImage').click()">
+                            <input type="file" id="editProductImage" accept="image/*" style="display:none" onchange="products.handleEditProductImageSelect(event)">
+                            <div class="image-upload-content">
+                                <div id="editProductImagePlaceholder">
+                                    <div style="font-size:32px; margin-bottom:8px;">📸</div>
+                                    <p style="font-size:12px; margin:0; color:var(--text-muted);">Click to change photo</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+<!--                    <button class="btn btn-danger" onclick="products.deleteProduct()">Delete</button>-->
+                    <div>
+                        <button class="btn btn-outline" onclick="products.closeModals()">Cancel</button>
+                        <button class="btn btn-primary" onclick="products.updateProduct()">Update</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders Page -->
+        <div id="ordersPage" class="page">
+            <div class="page-header">
+                <h2>Order History</h2>
+                <p>View all your orders</p>
+            </div>
+
+            <div class="section">
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Product</th>
+                                <th>Qty</th>
+                                <th>Amount</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTable">
+                            <tr>
+                                <td colspan="5" style="text-align:center;color:var(--text-muted)">No orders yet</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add Product Modal -->
+    <div class="modal" id="addProductModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Product</h3>
+                <button class="btn btn-icon" onclick="products.closeModals()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="productName">Product Name</label>
+                    <input type="text" id="productName" placeholder="e.g., Orange Juice">
+                </div>
+                <div class="form-group">
+                    <label for="productPrice">Price ($)</label>
+                    <input type="number" id="productPrice" placeholder="0.00" step="0.01" min="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="productImage">Product Photo <span style="color: var(--danger); font-weight: bold;">*</span> <span style="font-size: 11px; color: var(--text-muted);">(Required)</span></label>
+                    <div class="image-upload-area" id="productImageUploadArea" onclick="document.getElementById('productImage').click()">
+                        <input type="file" id="productImage" accept="image/*" style="display:none" onchange="products.handleProductImageSelect(event)">
+                        <div class="image-upload-content">
+                            <div id="productImagePreview" style="display:none;">
+                                <img id="productImagePreviewImg" src="" alt="preview" style="width:100%; height:100%; object-fit:cover; border-radius:8px;">
+                            </div>
+                            <div id="productImagePlaceholder">
+                                <div style="font-size:32px; margin-bottom:8px;">📸</div>
+                                <p style="font-size:12px; margin:0; color:var(--text-muted);">Click to select photo</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="products.closeModals()">Cancel</button>
+                <button class="btn btn-primary" onclick="products.addProduct()">Create Product</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Image Modal -->
+    <div class="modal" id="uploadImageModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Upload Image</h3>
+                <button class="btn btn-icon" onclick="products.closeModals()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="upload-zone" id="uploadZone" style="cursor: pointer;" onclick="document.getElementById('imageFile').click()">
+                    <input
+                        type="file"
+                        id="imageFile"
+                        accept="image/*"
+                        style="display:none"
+                        onchange="products.handleFileSelect(event)">
+                    <div class="upload-content">
+                        <div class="upload-icon">📸</div>
+                        <p>Click to select or drag image here</p>
+                        <span class="upload-hint">PNG, JPG, GIF up to 5MB</span>
+                    </div>
+                </div>
+                <input type="hidden" id="uploadProductId">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="products.closeModals()">Cancel</button>
+                <button class="btn btn-primary" id="uploadBtn" onclick="products.uploadImage()" disabled>Upload Image</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/products.js"></script>
+    <script src="js/orders.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
+
