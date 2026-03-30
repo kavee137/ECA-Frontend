@@ -237,7 +237,7 @@ nvm install 18
 npm install -g pm2
 
 # Start services with PM2
-pm2 start pm2/ecosystem.config.cjs
+pm2 start pm2/ecosystem.config.js
 pm2 save
 pm2 startup
 ```
